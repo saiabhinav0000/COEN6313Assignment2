@@ -1,0 +1,47 @@
+name: Deploy to GCE
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push Docker images
+      run: |
+        docker build -t gcr.io/coen6313assignment/api_gateway_image ./api_gateway
+        docker build -t gcr.io/coen6313assignment/order_service_image ./order_service
+        docker build -t gcr.io/coen6313assignment/v1_image ./user_service/v1
+        docker build -t gcr.io/coen6313assignment/v2_image ./user_service/v2
+        docker push gcr.io/coen6313assignment/api_gateway_image
+        docker push gcr.io/coen6313assignment/order_service_image
+        docker push gcr.io/coen6313assignment/v1_image
+        docker push gcr.io/coen6313assignment/v2_image
+
+    - name: Deploy to GCE
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        VM_IP: ${{ secrets.VM_IP }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh -o StrictHostKeyChecking=no user@$VM_IP "
+          docker pull gcr.io/coen6313assignment/api_gateway_image &&
+          docker pull gcr.io/coen6313assignment/order_service_image &&
+          docker pull gcr.io/coen6313assignment/v1_image &&
+          docker pull gcr.io/coen6313assignment/v2_image &&
+          docker run -d -p 8080:8080 gcr.io/coen6313assignment/api_gateway_image &&
+          docker run -d -p 5001:5001 gcr.io/coen6313assignment/order_service_image &&
+          docker run -d -p 5002:5002 gcr.io/coen6313assignment/v1_image &&
+          docker run -d -p 5003:5003 gcr.io/coen6313assignment/v2_image
+        "
