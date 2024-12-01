@@ -20,13 +20,14 @@ jobs:
       with:
         version: 'latest'
 
-    # Step 3: Authenticate with Google Cloud (using GCP_KEY directly)
+    # Step 3: Authenticate with Google Cloud (using GCP_KEY directly, base64 decoded)
     - name: Authenticate with Google Cloud
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_KEY }}
       run: |
-        # Authenticate using the GCP_KEY secret directly
-        echo "${{ secrets.GCP_KEY }}" | gcloud auth activate-service-account --key-file=- 
+        # Decode the base64-encoded GCP_KEY and authenticate
+        echo "${{ secrets.GCP_KEY }}" | base64 --decode > /tmp/gcloud-key.json
+        
+        # Authenticate with the decoded service account key
+        gcloud auth activate-service-account --key-file=/tmp/gcloud-key.json
         
         # Set the project
         gcloud config set project coen6313assignment
