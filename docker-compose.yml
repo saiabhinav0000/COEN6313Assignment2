@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  api_gateway:
+    image: api_gateway_image
+    ports:
+      - "8080:8080"
+
+  order_service:
+    image: order_service_image
+    ports:
+      - "5001:5001"
+
+  user_service_v1:
+    image: v1_image
+    ports:
+      - "5002:5002"
+  user_service_v2:
+    image: v2_image
+    ports:
+      - "5003:5003"
