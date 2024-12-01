@@ -13,13 +13,7 @@ jobs:
     # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
-
-    # Step 2: Set up Google Cloud SDK
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: 'latest'
-
+    
     # Step 3: Authenticate with Google Cloud (using GCP_KEY directly, base64 decoded)
     - name: Authenticate with Google Cloud
       run: |
@@ -31,6 +25,12 @@ jobs:
         
         # Set the project
         gcloud config set project coen6313assignment
+    
+    # Step 2: Set up Google Cloud SDK
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        version: 'latest'
 
     # Step 4: Set up Docker
     - name: Set up Docker
